@@ -1,3 +1,10 @@
+'''
+Author: Karen Vardanian (vkaren1777@icloud.com)
+File Created: Thursday, 22nd February 2024 8:59:04 pm
+Copyright © 2024 - Karen Vardanian
+'''
+
+
 from bcrypt import hashpw, gensalt, checkpw
 from typing import Dict
 from os import environ

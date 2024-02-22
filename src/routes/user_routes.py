@@ -1,3 +1,10 @@
+'''
+Author: Karen Vardanian (vkaren1777@icloud.com)
+File Created: Thursday, 22nd February 2024 8:40:04 pm
+Copyright © 2024 - Karen Vardanian
+'''
+
+
 from fastapi import APIRouter
 from src.handlers.user_handler import UserHandler
 
