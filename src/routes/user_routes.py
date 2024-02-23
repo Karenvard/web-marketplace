@@ -12,3 +12,4 @@ userRouter: APIRouter = APIRouter()
 
 userRouter.add_api_route("/signup", UserHandler.signup, methods=["POST"])
 userRouter.add_api_route("/signin", UserHandler.signin, methods=["POST"])
+userRouter.add_api_route("/changeInfo", UserHandler.changeInfo, methods=["POST"])

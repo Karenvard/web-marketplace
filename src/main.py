@@ -5,7 +5,6 @@ Copyright © 2024 - Karen Vardanian
 '''
 
 
-from typing import Dict, Optional
 from fastapi import FastAPI
 from src.routes.main_router import main_router
 
@@ -17,5 +16,3 @@ app.include_router(main_router)
 def index() -> str:
     return "index"
 
-
-    

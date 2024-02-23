@@ -8,5 +8,9 @@ Copyright © 2024 - Karen Vardanian
 from pydantic import BaseModel
 
 class SignupModel(BaseModel):
+    id: int
     username: str
+    fullname: str
     password: str
+    email: str
+    created: str
