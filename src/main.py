@@ -6,11 +6,15 @@ Copyright © 2024 - Karen Vardanian
 
 
 from fastapi import FastAPI
-from src.routes.main_router import main_router
-
+from routes.main_router import main_router
+from database.db import Database
 
 app: FastAPI = FastAPI()
-app.include_router(main_router)
+app.include_router("/api", main_router)
+
+print(Database.cur)
+Database.setup()
+print(Database.cur)
 
 @app.get("/")
 def index() -> str:

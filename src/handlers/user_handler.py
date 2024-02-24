@@ -15,8 +15,13 @@ class UserHandler:
     def _generateJwtToken(self, payload: Dict[str, str]) -> str:
         return encode(payload, environ.get("secret_jwt_key"), algorithm="HS256")
 
-    def signup(self, body: SignupModel) -> None:
-        pass
+    def signup(self, body: SignupModel) -> str:
+        
+
+        return self._generateJwtToken({'A': "a"});
 
     def signin(self) -> None:
+        pass
+
+    def changeInfo(self) -> None:
         pass

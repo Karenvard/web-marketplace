@@ -3,3 +3,4 @@ uvicorn
 pyjwt
 typing
 bcrypt
+psycopg2

@@ -7,7 +7,7 @@ Copyright © 2024 - Karen Vardanian
 
 
 from fastapi import APIRouter
-from src.handlers.seller_handler import SellerHandler
+from handlers.seller_handler import SellerHandler
 sellerRouter: APIRouter = APIRouter()
 
 sellerRouter.add_api_route("/create", SellerHandler.create, methods=["POST"])

@@ -6,7 +6,7 @@ Copyright © 2024 - Karen Vardanian
 
 
 from fastapi import APIRouter
-from src.handlers.user_handler import UserHandler
+from handlers.user_handler import UserHandler
 
 userRouter: APIRouter = APIRouter()
 

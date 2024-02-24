@@ -6,7 +6,7 @@ Copyright © 2024 - Karen Vardanian
 
 
 from fastapi import APIRouter
-from src.routes.user_routes import userRouter
+from routes.user_routes import userRouter
 
 main_router: APIRouter = APIRouter()
 
