@@ -12,5 +12,5 @@ sellerRouter: APIRouter = APIRouter()
 
 sellerRouter.add_api_route("/create", SellerHandler.create, methods=["POST"])
 sellerRouter.add_api_route("/addProduct", SellerHandler.addProduct, methods=["POST"])
-sellerRouter.add_api_route("/changeProduct", SellerHandler.changeProduct, methods=["POST"])
+sellerRouter.add_api_route("/changeProduct", SellerHandler.changeProduct, methods=["PUT"])
 sellerRouter.add_api_route("/delete", SellerHandler.delete, methods=["DELETE"])

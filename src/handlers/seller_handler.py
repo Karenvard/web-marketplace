@@ -5,18 +5,16 @@ Copyright © 2024 - Karen Vardanian
 '''
 
 
-
+from database.db import Database
+from fastapi import Depends
+from middlewares.auth_middleware import auth_middleware
+from models import createSellerModel, PayloadModel, addProductModel
 
 class SellerHandler:
 
-    def create(self) -> None:
+    def create(seller: createSellerModel, payload: PayloadModel.model_dump = Depends(auth_middleware)) -> None:
         pass
+        
 
-    def addProduct(self) -> None:
-        pass
-
-    def changeProduct(self) -> None:
-        pass
-
-    def delete(self) -> None:
+    def delete() -> None:
         pass

@@ -5,18 +5,18 @@ Copyright © 2024 - Karen Vardanian
 '''
 
 
-from fastapi import FastAPI
+from fastapi import FastAPI, middleware, Request
 from routes.main_router import main_router
 from database.db import Database
 
 app: FastAPI = FastAPI()
-app.include_router("/api", main_router)
+app.include_router(prefix="/api", router=main_router)
 
-print(Database.cur)
+
 Database.setup()
-print(Database.cur)
+
 
 @app.get("/")
-def index() -> str:
-    return "index"
+def index(request: Request) -> str:
+    return f"{request.headers.get('user-agent')}"
 
