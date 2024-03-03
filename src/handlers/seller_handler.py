@@ -1,20 +1,35 @@
-'''
-Author: Karen Vardanian (vkaren1777@icloud.com)
-File Created: Friday, 23rd February 2024 9:31:37 pm
-Copyright © 2024 - Karen Vardanian
-'''
 
 
-from database.db import Database
-from fastapi import Depends
-from middlewares.auth_middleware import auth_middleware
-from models import createSellerModel, PayloadModel, addProductModel
+class seller_handler:
 
-class SellerHandler:
-
-    def create(seller: createSellerModel, payload: PayloadModel.model_dump = Depends(auth_middleware)) -> None:
+    @staticmethod
+    def create(payload: dict) -> Dict[str, str]:
+        # 1. get candidate
+        # 2. check if candidate exists
+        # 3. insert seller into database
+        # 4. return success message {"message": "Seller was created successfully."}
         pass
-        
 
-    def delete() -> None:
+    @staticmethod
+    def update(payload: dict) -> Dict[str, str]:
+        # 1. get seller
+        # 3. update seller
+        pass
+
+    @staticmethod 
+    def get_authenticated(payload: dict) -> Dict[str, str]:
+        # 1. get seller
+        # 2. return seller
+        pass
+
+    @staticmethod
+    def get(payload: dict) -> Dict[str, str]:
+        # 1. get seller
+        # 3. return seller
+        pass
+
+    @staticmethod
+    def delete(payload: dict) -> Dict[str, str]:
+        # 1. get seller
+        # 3. delete seller
         pass

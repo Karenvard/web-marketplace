@@ -1,6 +1,6 @@
 import psycopg2 as pg
 from os import getenv, path
-from typing import Type, Optional, Tuple
+from typing import Any
 
 if path.exists(path.join(path.dirname(__file__), "..", "..", ".env")):
     from dotenv import load_dotenv
@@ -9,9 +9,9 @@ if path.exists(path.join(path.dirname(__file__), "..", "..", ".env")):
 
 
 class Database:
-    conn: pg.extensions.connection = None
-    cur: pg.extensions.cursor = None
-
+    conn: pg.extensions.connection
+    cur: pg.extensions.cursor
+    
     @staticmethod
     def setup():
         try:
@@ -25,31 +25,50 @@ class Database:
             Database.cur = Database.conn.cursor()
             querySQL = open(path.join(path.dirname(__file__), "tables.sql"), "r").read()
             Database.cur.execute(querySQL)
+            Database.cur.execute("SELECT COUNT(*) FROM roles")
+            count = len(Database.cur.fetchall())
+            if count < 2:
+                Database.cur.execute("DELETE FROM roles")
+                Database.cur.execute("INSERT INTO roles (name) VALUES ('ADMIN')")
+                Database.cur.execute("INSERT INTO roles (name) VALUES ('USER')")
         except Exception as e:
             print(f"Database error: {e}")
-        Database.conn.commit()
+        finally:
+            Database.conn.commit()
     
-
+    @staticmethod
+    def setupForTest():
+        try:
+            Database.conn = pg.connect(
+                dbname="test",
+                user=getenv("user"),
+                password=getenv("password"),
+                host=getenv("host"),
+                port=getenv("port"),
+            )
+            Database.cur = Database.conn.cursor()
+            querySQL = open(path.join(path.dirname(__file__), "tables.sql"), "r").read()
+            Database.cur.execute(querySQL)
+        except Exception as e:
+            print(f"Database error: {e}")
+        finally:
+            Database.conn.commit()
 
     @staticmethod
-    def fetchAll(columns: str, table: str, condition: str):
-        Database.cur.execute(f"SELECT {columns} FROM {table} WHERE {condition}")
+    def fetchAll(query: str) -> list[tuple[Any, ...]]:
+        Database.cur.execute(query)
         return Database.cur.fetchall()
     
     @staticmethod
-    def fetchOne(columns: str, table: str, condition: str) -> tuple[any, ...]:
-        Database.cur.execute(f"SELECT {columns} FROM {table} WHERE {condition}")
-        return Database.cur.fetchone()
-    
+    def fetchOne(query: str) -> tuple[Any, ...]:
+        Database.cur.execute(query)
+        return Database.cur.fetchone() or ()
+
     @staticmethod
-    def insertInto(table: str, columns: str, values: str) -> list:
-        Database.cur.execute(f"INSERT INTO {table} ({columns}) VALUES ({values})")
+    def commit(query: str):
+        Database.cur.execute(query)
         Database.conn.commit()
-    
-    def update(table: str, set: str, condition: str) -> list:
-        Database.cur.execute(f"UPDATE {table} SET {set} WHERE {condition}")
-        Database.conn.commit()
-    
+
 
     @staticmethod
     def close():

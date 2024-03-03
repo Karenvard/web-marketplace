@@ -1,0 +1,22 @@
+{
+  "venv": ".venv",
+  "path": ".",
+  "root": "src",
+  "executionEnvironments": {
+    "root": "src",
+    "pythonVersion": "3.11",
+    "pythonPlatform": "macOS",
+  },
+  "pythonVersion": "3.11",
+  "pythonPlatform": "macOS",
+  "include": [
+    "src"
+  ],
+
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "src/experimental",
+    "src/typestubs"
+  ]
+}

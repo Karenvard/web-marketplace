@@ -1,16 +1,49 @@
-from database.db import Database
-from fastapi import Depends, HTTPException
-from middlewares.auth_middleware import auth_middleware
-from models import addProductModel
-from models import PayloadModel
-
-class ProductHandler:
-    def addProduct(product: addProductModel, payload: PayloadModel.model_dump = Depends(auth_middleware)) -> None:
-        sellerId = Database.fetchOne("id", "sellers", f"user_id = {payload['id']}")[0]
-        if not sellerId:
-            raise HTTPException(status_code=400, detail="You are not a seller.")
-        Database.insertInto("products", "title, description, price, type_id, brand_id, color_id, seller_id", f"'{product.title}', '{product.description}', '{product.price}', '{product.type_id}', '{product.brand_id}', '{product.color_id}', '{sellerId}'")
 
 
-    def changeProduct(updatedProduct: addProductModel, payload: PayloadModel.model_dump = Depends(auth_middleware)) -> None:
+
+class product_handler:
+
+    @staticmethod
+    def add(payload: dict) -> Dict[str, str]:
+        # 1. get product
+        # 2. check if product exists
+        # 3. insert product into database
+        # 4. return success message {"message": "Product was created successfully."}
+        pass
+
+    @staticmethod
+    def update(payload: dict) -> Dict[str, str]:
+        # 1. get product
+        # 2. update product
+        pass
+
+    @staticmethod
+    def get(payload: dict) -> Dict[str, str]:
+        # 1. get product
+        # 2. return product
+        pass
+
+    @staticmethod
+    def get_all(payload: dict) -> Dict[str, str]:
+        # 1. get products
+        # 2. return products
+        pass
+
+    @staticmethod
+    def delete(payload: dict) -> Dict[str, str]:
+        # 1. get product
+        # 2. delete product
+        pass
+
+    @staticmethod
+    def rate(payload: dict) -> Dict[str, str]:
+        # 1. get product
+        # 2. check if already rated by current user
+        # 3. rate product
+        pass
+    
+    @staticmethod
+    def get_ratings(payload: dict) -> Dict[str, str]:
+        # 1. get product
+        # 2. get ratings
         pass

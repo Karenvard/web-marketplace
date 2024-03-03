@@ -1,55 +1,104 @@
-'''
-Author: Karen Vardanian (vkaren1777@icloud.com)
-File Created: Sunday, 25th February 2024 11:41:33 am
-Copyright © 2024 - Karen Vardanian
-'''
 
 
-from bcrypt import hashpw, gensalt, checkpw
-from datetime import datetime, timedelta
-from typing import Dict
-from os import environ
+from os import getenv
 from jwt import encode
-from models import SignupModel, SigninModel
-from fastapi import Depends, HTTPException
-from middlewares.auth_middleware import auth_middleware
-from models import PayloadModel, UserModel
 from database.db import Database
+from dto.AddUserDto import AddUserDto
+from dto.SigninDto import SigninDto
+from dto.UpdateUserDto import UpdateUserDto
+from ..models.PayloadModel import PayloadModel
+from ..models.SuccessfulResponse import SuccessfulResponse
+from fastapi import Depends, HTTPException
+from typing import Any, Dict
+from ..middlewares.auth_middleware import auth_middleware
+import bcrypt
 
-class UserHandler:
-
-    @staticmethod
-    def _generateJwtToken(payload: PayloadModel, remember_me: bool) -> str:
-        return encode(payload.model_dump(), environ.get("secret_jwt_key"), algorithm="HS256", headers={"expiration": 24*60*60 if remember_me else 3*60*60})
-
-
-    @staticmethod
-    def signup(signup: SignupModel) -> Dict[str, str]:
-        candidate = Database.fetchOne("*", "users", f"email = '{signup.email}'")
-        if candidate:
-            raise HTTPException(status_code=400, detail="Email already registered.")
-        Database.insertInto("users", "fullname, email, password", f"'{signup.fullname}', '{signup.email}', '{hashpw(signup.password.encode('utf-8'), gensalt()).decode('utf-8')}'")
-        createdUserId = Database.fetchOne("id", "users", f"email = '{signup.email}'")[0]
-        Database.insertInto("baskets", "user_id", f"{createdUserId}")
-        createdBasketId = Database.fetchOne("id", "baskets", f"user_id = {createdUserId}")[0]
-        Database.update("users", f"basket_id = '{createdBasketId}'", f"id = {createdUserId}")
-        return {"message": "User created successfully."}
-
-
-    @staticmethod
-    def signin(signin: SigninModel):
-        user = Database.fetchOne("id, email, password, fullname", "users", f"email = '{signin.email}';")
-        if not user:
-            raise HTTPException(status_code=400, detail="Invalid email or password.")
-        if not checkpw(signin.password.encode('utf-8'), user[2].encode('utf-8')):
-            raise HTTPException(status_code=400, detail="Invalid email or password.")
-        payload = PayloadModel(id=user[0], email=user[1], fullname=user[3])
-        token = UserHandler._generateJwtToken(payload, signin.remember_me)
-        return {"token": token}
+class user_handler:
     
     @staticmethod
-    def getAuthenticatedUser(payload: PayloadModel.model_dump = Depends(auth_middleware)) -> UserModel:
-        user = Database.fetchOne("id, fullname, email, basket_id, seller_id, created", "users", f"id = {payload['id']};")
-        return UserModel(id=user[0], fullname=user[1], email=user[2], basket_id=user[3], seller_id=user[4], created=user[5])
-        
+    def _generate_jwt_token(payload: PayloadModel) -> str:
+        return encode(dict(payload), getenv("jwt_secret_key"), algorithm="HS256")
 
+    @staticmethod
+    def signup(dto: AddUserDto) -> SuccessfulResponse:
+        # 1. get candidate
+        # 2. check if candidate exists
+        # 3. Hash password
+        # 4. Insert user into database with hashed password
+        # 5. Return success message {"message": "User was created successfully."}
+        candidate = Database.fetchOne(f"SELECT * FROM USERS WHERE username = '{dto.username}'")
+        if candidate:
+            raise HTTPException(status_code=400, detail="User already exists.")
+        hashedPassword: str = bcrypt.hashpw(dto.password.encode('utf-8'), bcrypt.gensalt()).decode("utf-8")
+        Database.commit(f"INSERT INTO USERS (fullname, username, password) VALUES ('{dto.fullname}', '{dto.username}', '{hashedPassword}')")
+        added_user_id = Database.fetchOne(f"SELECT id FROM users WHERE username = '{dto.username}'")
+        Database.commit(f"INSERT INTO baskets (user_id) VALUES ({added_user_id})")
+        Database.commit(f"INSERT INTO users (basket_id) VALUES ({added_user_id}) WHERE id = {added_user_id}")
+        return {"message": "User was created successfully."}
+
+    @staticmethod
+    def signin(dto: SigninDto) -> Dict[str, str]:
+        # 1. get user
+        # 2. check if user exists
+        # 3. check if password is correct
+        # 4. return success message {"message": "User was signed in successfully."}
+        user = Database.fetchOne(f"SELECT id, username, password, role_id FROM USERS WHERE username = '{dto.username}'")
+        if not user:
+            raise HTTPException(status_code=400, detail="Invalid username or password.")
+        if not bcrypt.checkpw(dto.password.encode('utf-8'), user[2].encode('utf-8')):
+            raise HTTPException(status_code=400, detail="Invalid username or password.")
+        token = user_handler._generate_jwt_token(PayloadModel(id=user[0], username=user[1], role_id=user[3]))
+        return {"token": token}
+
+    @staticmethod
+    def get_authenticated(payload: PayloadModel = Depends(auth_middleware)) -> Dict[str, Any]:
+        # 1. get user
+        # 2. return user
+        data = Database.fetchOne(f"SELECT id, username, fullname, role_id, created FROM USERS WHERE id = {payload['id']}")
+        user = {
+            "id": data[0],
+            "username": data[1],
+            "fullname": data[2],
+            "role_id": data[3],
+            "created": data[4]
+        }
+        return user
+
+    @staticmethod
+    def update(dto: UpdateUserDto, payload: PayloadModel = Depends(auth_middleware)) -> SuccessfulResponse:
+        # 1. get user
+        # 2. update user
+        user_password = Database.fetchOne(f"SELECT password FROM USERS WHERE id = {payload['id']}")[0]
+        if not bcrypt.checkpw(dto.verify_password.encode('utf-8'), user_password.encode('utf-8')):
+            raise HTTPException(status_code=400, detail="Invalid password.")
+        if dto.fullname is None and dto.username is None and dto.password is None:
+            raise HTTPException(status_code=400, detail="Nothing to update.")
+        if dto.fullname is not None:
+            Database.commit(f"UPDATE users SET fullname = '{dto.fullname}' WHERE id = {payload['id']}")
+        if dto.username is not None:
+            Database.commit(f"UPDATE users SET username = '{dto.username}' WHERE id = {payload['id']}")
+        if dto.password is not None:
+            hashedPassword: str = bcrypt.hashpw(dto.password.encode('utf-8'), bcrypt.gensalt()).decode("utf-8")
+            Database.commit(f"UPDATE users SET password = '{hashedPassword}' WHERE id = {payload['id']}")
+        return {"message": "User was updated successfully."}
+
+    @staticmethod
+    def get(user_id: int, payload: PayloadModel = Depends(auth_middleware)) -> Dict[str, str]:
+        # 1. get user
+        # 2. return user
+        data = Database.fetchOne(f"SELECT id, username, fullname, role_id, created FROM USERS WHERE id = {user_id}")
+        user = {
+            "id": data[0],
+            "username": data[1],
+            "fullname": data[2],
+            "role_id": data[3],
+            "created": data[4]
+        }
+        return user
+
+    @staticmethod
+    def delete(payload: PayloadModel = Depends(auth_middleware)) -> SuccessfulResponse:
+        # 1. get user
+        # 2. delete user
+        Database.commit(f"DELETE FROM users WHERE id = {payload['id']}")
+        return {"message": "User was deleted successfully."}

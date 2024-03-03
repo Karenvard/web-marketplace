@@ -5,18 +5,15 @@ Copyright © 2024 - Karen Vardanian
 '''
 
 
-from fastapi import FastAPI, middleware, Request
-from routes.main_router import main_router
-from database.db import Database
+from typing import Dict
+from fastapi import FastAPI
+from .routers.main_router import main_router
+from .database.db import Database
 
 app: FastAPI = FastAPI()
 app.include_router(prefix="/api", router=main_router)
 
-
-Database.setup()
-
-
-@app.get("/")
-def index(request: Request) -> str:
-    return f"{request.headers.get('user-agent')}"
-
+if __name__ == "__main__":
+    import uvicorn
+    Database.setup()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
