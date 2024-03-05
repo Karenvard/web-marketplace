@@ -1,8 +1,8 @@
 from fastapi import Request, HTTPException
 from os import path
-from ..models.SellerPayloadModel import SellerPayloadModel
+from models.SellerPayloadModel import SellerPayloadModel
 from .seller_middleware import seller_middleware
-from ..database.db import Database
+from database.db import Database
 from typing import Optional
 
 if path.exists(path.join(path.dirname(__file__), "..", "..", ".env")):
@@ -18,8 +18,8 @@ def product_middleware(request: Request) -> SellerPayloadModel:
         raise HTTPException(status_code=400, detail="Product id is required.")
     try:
         product_id = int(product_id_str)
-    except:
+    except Exception:
         raise HTTPException(status_code=400, detail="Product id must be a number.")
-    if not product_id in Database.fetchOne("id", "products", f"seller_id = {sellerPayload['seller_id']}"):
+    if sellerPayload["seller_id"] in Database.fetchOne(f"SELECT seller_id FROM products WHERE id = {product_id}"):
         raise HTTPException(status_code=400, detail="You are not authorized to access this product.")
     return sellerPayload

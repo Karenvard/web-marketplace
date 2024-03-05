@@ -1,9 +1,9 @@
 from fastapi import Request, HTTPException
 from os import path
-from ..models.PayloadModel import PayloadModel
-from ..models.SellerPayloadModel import SellerPayloadModel
+from models.PayloadModel import PayloadModel
+from models.SellerPayloadModel import SellerPayloadModel
 from .auth_middleware import auth_middleware
-from ..database.db import Database
+from database.db import Database
 
 if path.exists(path.join(path.dirname(__file__), "..", "..", ".env")):
     from dotenv import load_dotenv
@@ -12,13 +12,13 @@ if path.exists(path.join(path.dirname(__file__), "..", "..", ".env")):
 
 def seller_middleware(request: Request) -> SellerPayloadModel:
     payload: PayloadModel = auth_middleware(request)
-    sellerId = Database.fetchOne("id", "sellers", f"user_id = {payload['id']}")[0]
-    if not sellerId:
+    seller_id = Database.fetchOne(f"SELECT seller_id FROM users WHERE id = {payload['id']}")[0]
+    if not seller_id:
         raise HTTPException(status_code=400, detail="You are not a seller.")
     sellerPayload: SellerPayloadModel = {
         "id": payload['id'],
-        "fullname": payload['fullname'],
-        "email": payload['email'],
-        "seller_id": sellerId
+        "username": payload['username'],
+        "seller_id": seller_id,
+        "role_id": payload['role_id']
     }
     return sellerPayload
