@@ -5,7 +5,6 @@ Copyright © 2024 - Karen Vardanian
 '''
 
 
-from typing import Dict
 from fastapi import FastAPI
 from .routers.main_router import main_router
 from .database.db import Database

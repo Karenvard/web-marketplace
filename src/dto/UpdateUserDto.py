@@ -10,7 +10,8 @@ class UpdateUserDto(BaseModel):
 
     @validator("fullname")
     def validate_fullname(cls, value: str | None) -> str | None:
-        if value is None: return None
+        if value is None:
+            return None
         elif (len(value) > 50):
             raise ValueError("Fullname is too long.")
         elif (len(value.split(" ")) != 2):
@@ -19,7 +20,8 @@ class UpdateUserDto(BaseModel):
 
     @validator("username")
     def validate_username(cls, value: str) -> str | None:
-        if value is None: return None
+        if value is None:
+            return None
         elif (len(value) < 4):
             raise ValueError("Username is too short, must be at least 4.")
         elif (len(value) > 50):
@@ -30,7 +32,8 @@ class UpdateUserDto(BaseModel):
 
     @validator("password")
     def validate_password(cls, value: str) -> str | None:
-        if value is None: return None
+        if value is None:
+            return None
         elif (len(value) < 8):
             raise ValueError("Password is too short, must be at least 8.")
         elif (len(value) > 255):
