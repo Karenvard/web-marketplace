@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from ..handlers.brand_handler import brand_handler
+from handlers.brand_handler import brand_handler
 brand_router: APIRouter = APIRouter()
 
 
