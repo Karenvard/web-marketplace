@@ -2,8 +2,8 @@ from typing import Optional, TypedDict
 
 class SellerPayloadModel(TypedDict):
     id: int
-    fullname: str
-    email: str
+    username: str
     seller_id: Optional[int]
+    role_id: int
 
 
